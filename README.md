@@ -1,99 +1,100 @@
-# Terraform Azure Infrastructure
+# Terraform AWS Infrastructure
 
 ## Descripción
 
-Este proyecto gestiona una infraestructura Azure con Terraform para desplegar:
+Este proyecto gestiona una infraestructura AWS con Terraform para desplegar una arquitectura de tres capas.
 
-- Dos Virtual Networks, cada una con una subred.
-- Una VM Windows en cada subred.
-- Azure Bastion para acceso seguro.
-- NAT Gateway para tráfico saliente con IP pública estática.
-- Peering entre las Virtual Networks.
-- Separación de recursos en dos Resource Groups: `network` y `compute`.
+La configuración crea:
+
+- Una VPC con un rango `10.0.0.0/16`.
+- Una subred pública para el frontend.
+- Una subred privada para backend y base de datos.
+- Internet Gateway y tablas de ruta públicas.
+- NAT Gateway para tráfico saliente desde la subred privada.
+- Grupos de seguridad que restringen el acceso entre frontend, backend y base de datos.
+- Un Launch Template para instancias EC2 con Amazon Linux 2, Docker y Git.
+- Tres instancias EC2: `frontend`, `backend` y `database`.
 
 ## Estructura del proyecto
 
 ```
-deployment_azure_netwrok_terraform/
+./
 ├── main.tf
-├── providers.tf
-├── variables.tf
-├── terraform.tfvars
-├── outputs.tf
-├── modules/
-│   ├── network/
-│   │   ├── main.tf
-│   │   ├── variables.tf
-│   │   ├── outputs.tf
-│   └── compute/
-│       ├── main.tf
-│       ├── variables.tf
-│       ├── outputs.tf
-└── README.md
+├── README.md
 ```
+
+> El proyecto actual reside en la raíz del repositorio y utiliza un único archivo Terraform.
 
 ## Requisitos
 
 - Terraform CLI versión >= 1.0.
-- Azure CLI (`az`) o autenticación con variables de entorno.
-- Suscripción Azure con permisos de `Contributor` u `Owner`.
-- Provider `azurerm` versión >= 3.0.
+- Credenciales AWS configuradas en el entorno o en el perfil de AWS CLI.
+- Cuenta AWS con permisos para crear VPC, subnets, EC2, NAT Gateway, Route Tables, Security Groups y Elastic IP.
+- Provider `aws` versión `~> 5.0`.
 
 ## Flujo de uso
 
-1. Clonar el repositorio.
-2. Entrar en la carpeta del proyecto:
+1. Configura tus credenciales AWS:
 
 ```bash
-cd deployment_azure_netwrok_terraform
+export AWS_ACCESS_KEY_ID="..."
+export AWS_SECRET_ACCESS_KEY="..."
+export AWS_DEFAULT_REGION="us-east-1"
 ```
 
-3. Inicializar Terraform:
+2. Inicializa Terraform:
 
 ```bash
 terraform init
 ```
 
-4. Verificar el plan:
+3. Revisa el plan de despliegue:
 
 ```bash
 terraform plan
 ```
 
-5. Aplicar los cambios:
+4. Aplica los cambios:
 
 ```bash
 terraform apply
 ```
 
+5. (Opcional) Elimina los recursos cuando ya no los necesites:
+
+```bash
+terraform destroy
+```
+
 ## ¿Qué despliega este proyecto?
 
-- Módulo `network`
-  - Resource Group de red.
-  - Dos Virtual Networks con sus respectivas subredes.
-  - NSGs para controlar tráfico de HTTP y acceso RDP protegido.
-  - NAT Gateway con IP pública estática para salida segura.
-  - Subnet `AzureBastionSubnet` y IP pública para Azure Bastion.
-  - Peering bidireccional entre las dos VNets.
-
-- Módulo `compute`
-  - Resource Group de cómputo.
-  - VMs Windows desplegadas en cada subred.
-  - Instalación de IIS en cada VM mediante extensión.
-  - Azure Bastion Host configurado para acceder a las VMs de forma segura.
+- `aws_vpc.main`: VPC principal.
+- `aws_subnet.public` y `aws_subnet.private`: subredes pública y privada.
+- `aws_internet_gateway.igw`: puerta de enlace de Internet.
+- `aws_route_table.public_rt`: ruta pública hacia Internet.
+- `aws_nat_gateway.nat`: NAT Gateway para salida de la subred privada.
+- `aws_route_table.private_rt`: ruta privada hacia la NAT Gateway.
+- `aws_security_group.front_sg`: permite HTTP y SSH desde Internet.
+- `aws_security_group.back_sg`: permite tráfico del frontend en el puerto 5000.
+- `aws_security_group.data_sg`: permite tráfico MySQL (`3306`) solo desde el backend.
+- `aws_launch_template.template`: plantilla de lanzamiento con Amazon Linux 2 y user data.
+- `aws_instance.frontend`, `aws_instance.backend`, `aws_instance.database`: instancias EC2 para cada capa.
 
 ## Mejores prácticas incluidas
 
-- Separación clara de responsabilidades en módulos `network` y `compute`.
-- Variables organizadas en el root y en cada módulo.
-- Outputs definidos para exponer IDs críticos y datos importantes.
-- Tags globales aplicadas a recursos compatibles.
-- Uso de recursos administrados en Azure para mantener la infraestructura declarativa.
+- Infraestructura declarativa con Terraform HCL.
+- Uso de variables para `region`, `instance_type` y `ami`.
+- Separación de subredes pública y privada para mejorar la seguridad.
+- Grupos de seguridad por capa para limitar el tráfico entre tiers.
+- Plantilla de lanzamiento reutilizable para instancias EC2.
+- Automatización de configuración inicial con user data.
 
 ## Cómo extender este proyecto
 
-- Agregar balanceadores de carga entre las VMs.
-- Añadir autoescalado con `Virtual Machine Scale Sets`.
-- Integrar módulos adicionales para Azure Storage, bases de datos o Key Vault.
-- Automatizar despliegue con Azure DevOps o GitHub Actions.
-- Usar un backend remoto de Terraform Cloud/Enterprise para estado compartido.
+- Extraer recursos en módulos separados (`network`, `compute`, `database`).
+- Añadir outputs para IDs de recursos y direcciones IP.
+- Parametrizar el número de instancias y los rangos de CIDR.
+- Integrar un balanceador de carga para el frontend.
+- Sustituir instancias de base de datos por un servicio gestionado como RDS.
+- Configurar un backend remoto para el estado de Terraform.
+- Añadir un pipeline de CI/CD con GitHub Actions o AWS CodePipeline.
