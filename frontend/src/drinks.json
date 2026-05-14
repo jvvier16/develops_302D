@@ -1,0 +1,58 @@
+[
+  {
+    "name": "Café Latte",
+    "category": "Café",
+    "description": "Espresso suave con leche espumosa para comenzar el día con calidez.",
+    "color": "#d9b38c",
+    "icon": "☕"
+  },
+  {
+    "name": "Té Matcha",
+    "category": "Té",
+    "description": "Polvo de té verde japonés con un sabor vibrante y un toque vegetal.",
+    "color": "#a4c987",
+    "icon": "🍵"
+  },
+  {
+    "name": "Smoothie Tropical",
+    "category": "Smoothie",
+    "description": "Mango, piña y plátano mezclados con yogurt para una explosión de fruta.",
+    "color": "#f7cb78",
+    "icon": "🍌"
+  },
+  {
+    "name": "Mojito",
+    "category": "Cóctel",
+    "description": "Menta fresca, lima y soda para un momento refrescante y chispeante.",
+    "color": "#9adeb3",
+    "icon": "🍸"
+  },
+  {
+    "name": "Agua de Jamaica",
+    "category": "Agua fresca",
+    "description": "Hibisco infusionado con un dulzor ligero y un color rojo intenso.",
+    "color": "#f09ab7",
+    "icon": "🌺"
+  },
+  {
+    "name": "Chocolate Caliente",
+    "category": "Bebida caliente",
+    "description": "Cacao cremoso con una pizca de canela para una tarde reconfortante.",
+    "color": "#c48c63",
+    "icon": "🍫"
+  },
+  {
+    "name": "Cerveza Artesanal",
+    "category": "Cerveza",
+    "description": "Lúpulo delicado y maltas tostadas en una cerveza de sabor balanceado.",
+    "color": "#f3d27a",
+    "icon": "🍺"
+  },
+  {
+    "name": "Sangría",
+    "category": "Vino",
+    "description": "Vino tinto afrutado con trozos de fruta fresca y un toque de naranja.",
+    "color": "#e5a4a0",
+    "icon": "🍷"
+  }
+]
